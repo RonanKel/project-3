@@ -98,7 +98,7 @@ def check():
     in_jumble = LetterBag(jumble).contains(text)
     matched = WORDS.has(text)
 
- 
+
     if matched and in_jumble and not (text in matches): 
         # Cool, they found a new word
         matches.append(text)
@@ -108,9 +108,9 @@ def check():
         else:
             rslt = {"cond_status": True}
 
-    elif text in matches:
+    elif not in_jumble:
         #flask.flash("You already found {}".format(text))
-        rslt = {"cond_status": "found"}
+        rslt = {"cond_status": "can't be made"}
 
     elif not matched:
         #flask.flash("{} isn't in the list of words".format(text))

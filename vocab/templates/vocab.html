@@ -132,8 +132,8 @@
                                $("#attempt").val("");
 			       $("#response").text("");
 			    } 
-			    else if (rsval === "found") { 
-			       $("#response").text("You already found " + txt);
+			    else if (rsval === "can't be made") { 
+			       $("#response").text("You can't make " +txt+ " using the anagram");
 			    }	
 			    else if (rsval === "not in list") {
 			       $("#response").text(txt + " isn't in the list of words");
