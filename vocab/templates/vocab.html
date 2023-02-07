@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html>
    <head>
       <!-- Using Bootstrap, so that we're `responsive`! -->
@@ -73,31 +74,81 @@
          <br />
          <div class="row">
             <div class="col-xs-6 text-center">
-               <form id="entry" method="POST" action="/_check">
+               <form id="entry">
                   <label for="attempt">Word:</label>
                   <input id="attempt" name="attempt" type="text" width="15"
                      autocomplete="off"  autofocus />
-                  <input type="submit" name="try" />
                </form>
             </div>
          </div>
          <br />
-         {% if session.matches|length is not equalto 0  %}
          <h2>You found </h2>
          <p id="results">
-            {% for match in session.matches %}
-            {{ match }}
-            {% endfor %}
          </p>
-         {% endif %}
-         {% with messages = get_flashed_messages() %}
-         {% if messages %}
+	 </div>
+         <p id="response"> </p>
          <!-- Mismatch, already found, etc. "flashed" from Python -->
-         {% for message in messages %}
          <p class="message">{{ message }}</p>
-         {% endfor %}
-         {% endif %}
-         {% endwith %}
+
+
+	 <script>
+            // Suppress normal form submission
+	     $("#entry").submit( function(even) {
+	       event.preventDefault();
+	      });
+		
+	    // On each keystroke, ask the server whether the current
+            // word is in the list
+            //
+            // We use 'keyup' because the form value
+            // is updated before that event is generated.
+            // keypress is triggered before the input field has been
+            // updated.  Be aware that we'll see non-character keys like
+            // shift and control, so make sure whatever you do with the
+            // event does not depend on it being a letter.
+            //
+
+	    $("#attempt").keyup(function(event) {
+               var txt = $("#attempt").val();  // Current content of the input field
+               var keycode = event.which;      // They key that just went up
+               var letter = String.fromCharCode(keycode);
+
+	       // That letter might not be a letter ... it could be the
+               // the backspace key, or even the shift key, because 'keyup'
+               // catches all kinds of keys.  (Also, the difference between
+               // upper and lower case comes from state of shift key + key code,
+               // so ignoring the shift key we get only the upper case letters.
+
+               if (! "ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(letter)) { return }	
+
+	       $.getJSON( "/_check", { text: txt },
+                          function(data) {
+                            rsval = data.result.cond_status;
+	
+                            console.log("rsval: " + rsval)
+
+                            if (rsval === true) {
+                               $("#results").append(txt + " ");
+                               $("#attempt").val("");
+			       $("#response").text("");
+			    } 
+			    else if (rsval === "found") { 
+			       $("#response").text("You already found " + txt);
+			    }	
+			    else if (rsval === "not in list") {
+			       $("#response").text(txt + " isn't in the list of words");
+			    }
+                            else if (rsval === "all done") {
+			       $(location).prop('href', "/success");
+   			    }                         
+                         }
+                       );
+               });
+
+
+
+
+	 </script>
       </div>
       <!-- container -->
    </body>
